@@ -5,45 +5,83 @@ window.addEventListener("load", start);
 //***************Controller */
 function start(){
     console.log("JS is working")
+    showBoard();
     makeBoardClickable()
 }
 
 let currentPlayer = 1;
 
 function selectCell(row, col){
-    if(currentPlayer === 1){
-        writeToCell(row, col, 1);
-        currentPlayer = 2;
-    } else {
-        writeToCell(row, col, 2);
-        currentPlayer = 1;
-    }
-    console.table(model)
+    if(readFromCell(row, col) === 0){
+    writeToCell(row, col, currentPlayer);
     showBoard();
-    if(checkForWin()){
+    nextPlayer();
+    if(checkForWin() !== false){
         console.log("Winner!")
-        showWinner();
+        showWinner(checkForWin());
     }
+    } else {
+        console.log("Cell already taken")
+    }
+}
+
+function nextPlayer(){
+    if(currentPlayer === 1){
+        currentPlayer = 2;
+        setTimeout(computerTurn, 1000)
+    } else {
+        currentPlayer = 1;
+        playerTurn();
+    }
+}
+
+function playerTurn(){
+
+}
+
+function computerTurn(){
+    const availableCells = getAvailableCells();
+    if(availableCells.length === 0){
+        console.log("No available cells")
+
+        setTimeout(resetGame, 3000)
+    } else {
+    const randomIndex = Math.floor(Math.random() * availableCells.length);
+    selectCell(availableCells[randomIndex].row, availableCells[randomIndex].col);
+}
+}
+
+function getAvailableCells(){
+    const availableCells = [];
+    for(let row = 0; row < model.length; row++){
+        for(let col = 0; col < model[row].length; col++){
+            if(readFromCell(row, col) === 0){
+                availableCells.push({row, col});
+            }
+        }
+    }
+    return availableCells;
+
 }
 
 function checkForWin(){
     
     if(model[0][0] === model[0][1] && model[0][0] === model[0][2] && model[0][0] !== 0){
-        return true;
+        return model[0][0];
     } else if(model[1][0] === model[1][1] && model[1][0] === model[1][2] && model[1][0] !== 0){
-        return true;
+        return model[1][0];
     } else if(model[2][0] === model[2][1] && model[2][0] === model[2][2] && model[2][0] !== 0){
-        return true;
+        return model[2][0];
     } else if(model[0][0] === model[1][0] && model[0][0] === model[2][0] && model[0][0] !== 0){
-        return true;
+        return model[0][0];
     } else if(model[0][1] === model[1][1] && model[0][1] === model[2][1] && model[0][1] !== 0){
-        return true;
+        return model[0][1];
     } else if(model[0][2] === model[1][2] && model[0][2] === model[2][2] && model[0][2] !== 0){
-        return true;
+        return model[0][2];
     } else if(model[0][0] === model[1][1] && model[0][0] === model[2][2] && model[0][0] !== 0){
-        return true;
+        return model[0][0];
     } else if(model[0][2] === model[1][1] && model[0][2] === model[2][0] && model[0][2] !== 0){
-        return true;
+        return model[0][2];
     }
 
     return false;
@@ -95,8 +133,15 @@ function showBoard(){
 
 }
 
-function showWinner(){
-    
+function showWinner(player){
+    const winner = document.querySelector("#winner");
+    if(player === 1){
+        winner.textContent = `Player X wins!`
+    } else {
+    winner.textContent = `Player O wins!`
+}
+document.querySelector("#board").removeEventListener("click", boardClicked)
+setTimeout(resetGame, 3000)
 }
 
 
@@ -117,3 +162,18 @@ function readFromCell(row, col){
 }
 
 
+function resetGame(){
+    model[0][0] = 0;
+    model[0][1] = 0;
+    model[0][2] = 0;
+    model[1][0] = 0;
+    model[1][1] = 0;
+    model[1][2] = 0;
+    model[2][0] = 0;
+    model[2][1] = 0;
+    model[2][2] = 0;
+    showBoard();
+    document.querySelector("#winner").textContent = "";
+    currentPlayer = 1;
+    makeBoardClickable();
+}
